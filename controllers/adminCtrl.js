@@ -37,20 +37,34 @@ const getAllDoctorsController = async (req, res) => {
   }
 };
 
-// doctor account status
 const changeAccountStatusController = async (req, res) => {
   try {
     const { doctorId, status } = req.body;
-    const doctor = await doctorModel.findByIdAndUpdate(doctorId, { status });
+    const doctor = await doctorModel.findById(doctorId);
+    if (!doctor) {
+      return res.status(404).send({
+        success: false,
+        message: "Doctor not found",
+      });
+    }
+    doctor.status = status;
+    await doctor.save();
     const user = await userModel.findOne({ _id: doctor.userId });
-    const notifcation = user.notifcation;
-    notifcation.push({
+    if (!user) {
+      return res.status(404).send({
+        success: false,
+        message: "User not found",
+      });
+    }
+    const unseen = user.unseen || [];
+    unseen.push({
       type: "doctor-account-request-updated",
-      message: `Your Doctor Account Request Has ${status} `,
+      message: `Your Doctor Account Request Has ${status}`,
       onClickPath: "/notification",
     });
     user.isDoctor = status === "approved" ? true : false;
     await user.save();
+
     res.status(201).send({
       success: true,
       message: "Account Status Updated",
@@ -60,7 +74,7 @@ const changeAccountStatusController = async (req, res) => {
     console.log(error);
     res.status(500).send({
       success: false,
-      message: "Eror in Account Status",
+      message: "Error in updating account status",
       error,
     });
   }

@@ -4,6 +4,7 @@ const doctorSchema = new mongoose.Schema(
   {
     userId: {
       type: String,
+      required:[true,"id required"]
     },
     firstName: {
       type: String,
@@ -44,10 +45,14 @@ const doctorSchema = new mongoose.Schema(
       type: String,
       default: "pending",
     },
-    timings: {
-      type: Object,
+    fromTime: {
+      type: String,
       required: [true, "wrok timing is required"],
     },
+    toTime:{
+      type:String,
+      required:[true, "wrok timing is required"],
+    }
   },
   { timestamps: true }
 );
